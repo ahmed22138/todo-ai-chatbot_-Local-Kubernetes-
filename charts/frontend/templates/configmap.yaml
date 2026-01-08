@@ -1,0 +1,10 @@
+# T071: Frontend ConfigMap for environment variables
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "frontend.fullname" . }}-config
+  labels:
+    {{- include "frontend.labels" . | nindent 4 }}
+data:
+  REACT_APP_API_URL: {{ .Values.config.backendUrl | quote }}
+  REACT_APP_BACKEND_URL: {{ .Values.config.backendUrl | quote }}

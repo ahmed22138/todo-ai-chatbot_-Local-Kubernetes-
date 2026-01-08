@@ -1,0 +1,13 @@
+# PostgreSQL Database Helm Chart
+apiVersion: v2
+name: database
+description: PostgreSQL database for Todo AI Chatbot
+type: application
+version: 0.1.0
+appVersion: "16"
+keywords:
+  - database
+  - postgresql
+  - todo
+maintainers:
+  - name: Phase IV Team

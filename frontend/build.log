@@ -1,0 +1,73 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 1.18kB 0.1s done
+#1 DONE 0.1s
+
+#2 [internal] load metadata for docker.io/library/nginx:alpine
+#2 ...
+
+#3 [auth] library/node:pull token for registry-1.docker.io
+#3 DONE 0.0s
+
+#4 [auth] library/nginx:pull token for registry-1.docker.io
+#4 DONE 0.0s
+
+#5 [internal] load metadata for docker.io/library/node:18-alpine
+#5 ...
+
+#2 [internal] load metadata for docker.io/library/nginx:alpine
+#2 DONE 2.3s
+
+#5 [internal] load metadata for docker.io/library/node:18-alpine
+#5 DONE 4.1s
+
+#6 [internal] load .dockerignore
+#6 transferring context: 695B 0.0s done
+#6 DONE 0.1s
+
+#7 [internal] load build context
+#7 DONE 0.0s
+
+#8 [runtime 1/5] FROM docker.io/library/nginx:alpine@sha256:8491795299c8e739b7fcc6285d531d9812ce2666e07bd3dd8db00020ad132295
+#8 resolve docker.io/library/nginx:alpine@sha256:8491795299c8e739b7fcc6285d531d9812ce2666e07bd3dd8db00020ad132295 0.1s done
+#8 DONE 0.1s
+
+#9 [builder 1/6] FROM docker.io/library/node:18-alpine@sha256:8d6421d663b4c28fd3ebc498332f249011d118945588d0a35cb9bc4b8ca09d9e
+#9 resolve docker.io/library/node:18-alpine@sha256:8d6421d663b4c28fd3ebc498332f249011d118945588d0a35cb9bc4b8ca09d9e 0.1s done
+#9 DONE 0.1s
+
+#7 [internal] load build context
+#7 transferring context: 337.06kB 0.1s done
+#7 DONE 0.2s
+
+#9 [builder 1/6] FROM docker.io/library/node:18-alpine@sha256:8d6421d663b4c28fd3ebc498332f249011d118945588d0a35cb9bc4b8ca09d9e
+#9 DONE 0.3s
+
+#9 [builder 1/6] FROM docker.io/library/node:18-alpine@sha256:8d6421d663b4c28fd3ebc498332f249011d118945588d0a35cb9bc4b8ca09d9e
+#9 sha256:25ff2da83641908f65c3a74d80409d6b1b62ccfaab220b9ea70b80df5a2e0549 0B / 446B 0.2s
+#9 sha256:25ff2da83641908f65c3a74d80409d6b1b62ccfaab220b9ea70b80df5a2e0549 0B / 446B 46804.5s
+#9 sha256:1e5a4c89cee5c0826c540ab06d4b6b491c96eda01837f430bd47f0d26702d6e3 0B / 1.26MB 0.2s
+#9 sha256:dd71dde834b5c203d162902e6b8994cb2309ae049a0eabc4efea161b2b5a3d0e 0B / 40.01MB 0.2s
+#9 sha256:f18232174bc91741fdf3da96d85011092101a032a93a388b79e99e69c2d5c870 0B / 3.64MB 0.2s
+#9 sha256:1e5a4c89cee5c0826c540ab06d4b6b491c96eda01837f430bd47f0d26702d6e3 0B / 1.26MB 46804.5s
+#9 sha256:dd71dde834b5c203d162902e6b8994cb2309ae049a0eabc4efea161b2b5a3d0e 0B / 40.01MB 46804.5s
+#9 sha256:f18232174bc91741fdf3da96d85011092101a032a93a388b79e99e69c2d5c870 0B / 3.64MB 46804.5s
+#9 DONE 1.6s
+
+#10 [builder 2/6] WORKDIR /app
+#10 ERROR: failed commit on ref "layer-sha256:25ff2da83641908f65c3a74d80409d6b1b62ccfaab220b9ea70b80df5a2e0549": commit failed: rename /var/lib/desktop-containerd/daemon/io.containerd.content.v1.content/ingest/a820a16a78d1caad4cc63e3d9865417c093a5c5ac8c3a48efd3ba03466def3e3/data /var/lib/desktop-containerd/daemon/io.containerd.content.v1.content/blobs/sha256/25ff2da83641908f65c3a74d80409d6b1b62ccfaab220b9ea70b80df5a2e0549: no such file or directory
+------
+ > [builder 2/6] WORKDIR /app:
+------
+Dockerfile:6
+--------------------
+   4 |     ARG NODE_VERSION=18
+   5 |     FROM node:${NODE_VERSION}-alpine AS builder
+   6 | >>> WORKDIR /app
+   7 |     
+   8 |     # Copy package files
+--------------------
+ERROR: failed to build: failed to solve: failed to compute cache key: failed commit on ref "layer-sha256:25ff2da83641908f65c3a74d80409d6b1b62ccfaab220b9ea70b80df5a2e0549": commit failed: rename /var/lib/desktop-containerd/daemon/io.containerd.content.v1.content/ingest/a820a16a78d1caad4cc63e3d9865417c093a5c5ac8c3a48efd3ba03466def3e3/data /var/lib/desktop-containerd/daemon/io.containerd.content.v1.content/blobs/sha256/25ff2da83641908f65c3a74d80409d6b1b62ccfaab220b9ea70b80df5a2e0549: no such file or directory
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/qyl0gu1ubuj7wd80c3m3zy26f

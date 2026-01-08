@@ -1,0 +1,1 @@
+var d=(t,n,r)=>new Promise((h,a)=>{var l=e=>{try{u(r.next(e))}catch(o){a(o)}},s=e=>{try{u(r.throw(e))}catch(o){a(o)}},u=e=>e.done?h(e.value):Promise.resolve(e.value).then(l,s);u((r=r.apply(t,n)).next())});function q(t){let n=r=>d(this,null,function*(){return"handler"in t?t.handler(r.request):t(r.request)});return{GET:n,POST:n}}export{q as toSolidStartHandler};

@@ -1,0 +1,13 @@
+services:
+  javascript-app:
+    build:
+      context: .
+    image: javascript-app:dev
+    container_name: javascript-app
+    ports:
+      - "3000:3000"  # Expose the React app on port 3000
+    restart: unless-stopped
+    init: true
+    # env_file: ./.env  # Uncomment if .env file exists
+    # No volumes needed as this is a static build
+    # No external dependencies detected

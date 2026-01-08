@@ -1,0 +1,35 @@
+# PostgreSQL Database values
+image:
+  repository: postgres
+  tag: "16-alpine"
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+
+# PostgreSQL configuration
+postgresql:
+  database: todo_chatbot
+  username: todouser
+  password: todopass123  # Change in production
+  port: 5432
+
+# Persistence
+persistence:
+  enabled: true
+  size: 5Gi
+  storageClass: standard
+
+# Resources
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+# Service
+service:
+  type: ClusterIP
+  port: 5432

@@ -1,0 +1,47 @@
+T072: Post-installation instructions for frontend
+
+🎉 Frontend successfully deployed!
+
+To access the Todo AI Chatbot frontend:
+
+1. Get the application URL:
+   {{- if eq .Values.service.type "NodePort" }}
+
+   Run the following command to get the URL:
+
+   minikube service {{ include "frontend.fullname" . }}-service --url
+
+   Or access directly at:
+
+   http://$(minikube ip):{{ .Values.service.nodePort }}
+
+   {{- else if eq .Values.service.type "LoadBalancer" }}
+
+   NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+
+   export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "frontend.fullname" . }}-service --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+   echo http://$SERVICE_IP:{{ .Values.service.port }}
+
+   {{- else if eq .Values.service.type "ClusterIP" }}
+
+   Run port-forward:
+
+   kubectl port-forward --namespace {{ .Release.Namespace }} svc/{{ include "frontend.fullname" . }}-service {{ .Values.service.port }}:{{ .Values.service.port }}
+   echo "Visit http://127.0.0.1:{{ .Values.service.port }}"
+
+   {{- end }}
+
+2. Verify pods are running:
+
+   kubectl get pods -l app.kubernetes.io/name={{ include "frontend.name" . }}
+
+3. Check service status:
+
+   kubectl get svc {{ include "frontend.fullname" . }}-service
+
+4. View logs:
+
+   kubectl logs -l app.kubernetes.io/name={{ include "frontend.name" . }} --tail=50
+
+Backend connection:
+- The frontend is configured to communicate with backend at: {{ .Values.config.backendUrl }}

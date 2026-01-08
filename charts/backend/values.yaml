@@ -1,0 +1,69 @@
+# FastAPI Backend values
+image:
+  repository: todo-backend
+  tag: "1.0.0"
+  pullPolicy: Never
+
+nameOverride: ""
+fullnameOverride: ""
+
+# Backend configuration
+backend:
+  port: 8000
+  environment: development
+
+  # CORS - Allow all origins for development (fix "Failed to fetch" error)
+  allowedOrigins: "*"
+
+  # Database connection (references the database service)
+  database:
+    host: todo-database-service
+    port: 5432
+    name: todo_chatbot
+    username: todouser
+    password: todopass123
+
+  # JWT secret key (minimum 32 characters)
+  jwtSecret: "your-super-secret-jwt-key-min-32-chars-required-for-security"
+
+  # OpenAI API key (set via environment variable or values override)
+  openaiApiKey: "sk-your-openai-api-key-here"
+
+# Replicas
+replicaCount: 2
+
+# Resources
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+# Service
+service:
+  type: NodePort
+  port: 8000
+  nodePort: 30800
+
+# Probes
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+    port: 8000
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+    port: 8000
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
