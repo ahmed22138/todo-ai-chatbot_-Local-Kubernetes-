@@ -1,0 +1,7 @@
+values-local.yaml
+*.zip
+*.exe
+.vscode/
+.claude/settings.local.json
+nul
+kubectl-ai-temp/

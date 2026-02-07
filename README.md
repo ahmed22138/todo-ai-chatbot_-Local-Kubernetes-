@@ -93,7 +93,7 @@ kubectl wait --for=condition=ready pod/todo-database-0 --timeout=180s
 ### Step 6: Deploy Backend
 
 ```powershell
-helm install todo-backend charts/backend --set backend.openaiApiKey="YOUR-OPENAI-API-KEY"
+helm install todo-backend charts/backend -f charts/backend/values-local.yaml
 ```
 
 ```powershell
