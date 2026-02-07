@@ -27,7 +27,7 @@ RUN apk add --no-cache curl
 COPY nginx.conf /etc/nginx/nginx.conf
 
 # Copy built static files from builder
-COPY --from=builder /app/build /usr/share/nginx/html
+COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Security: run as non-root user
 RUN chown -R nginx:nginx /usr/share/nginx/html && \

@@ -46,6 +46,6 @@ temp/
 .local/
 local/
 
-# Source files (we only need dist)
-src/
-public/
+# Build output (not needed for build)
+dist/
+build/

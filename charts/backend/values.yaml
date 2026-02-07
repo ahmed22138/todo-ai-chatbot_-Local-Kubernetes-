@@ -26,11 +26,11 @@ backend:
   # JWT secret key (minimum 32 characters)
   jwtSecret: "your-super-secret-jwt-key-min-32-chars-required-for-security"
 
-  # OpenAI API key (set via environment variable or values override)
-  openaiApiKey: "sk-your-openai-api-key-here"
+  # OpenAI API key (set via --set flag or environment variable)
+  openaiApiKey: ""
 
 # Replicas
-replicaCount: 2
+replicaCount: 1
 
 # Resources
 resources:

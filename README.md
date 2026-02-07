@@ -1,192 +1,330 @@
-# Phase 4: Kubernetes Deployment - Todo AI Chatbot
-
-Complete Kubernetes deployment of the Todo AI Chatbot application using Helm charts on Minikube.
-
-## Quick Start
-
-### Prerequisites
-- Docker Desktop running
-- Minikube installed and running
-- kubectl configured
-- Helm 3+ installed
-
-### Deploy the Application
-
-1. **Start Minikube** (if not already running):
-```bash
-minikube start --cpus=2 --memory=3072
-```
-
-2. **Load Docker images to Minikube**:
-```bash
-minikube image load todo-backend:1.0.0
-minikube image load todo-frontend:1.0.0
-```
-
-3. **Deploy Database**:
-```bash
-helm install todo-database charts/database
-```
-
-4. **Deploy Backend**:
-```bash
-helm install todo-backend charts/backend
-```
-
-5. **Deploy Frontend**:
-```bash
-helm install todo-frontend charts/frontend
-```
-
-6. **Access the Application**:
-```bash
-minikube service todo-frontend-service --url
-```
-
-### Verify Deployment
-
-Check all components are running:
-```bash
-kubectl get pods
-# All pods should show STATUS: Running
-
-kubectl get svc
-# Services should be created
-
-# Test backend health
-kubectl run curl-test --image=curlimages/curl:latest --rm -i --restart=Never -- \
-  curl -s http://todo-backend-service:8000/health
-# Should return: {"status":"healthy","api":"operational","database":"connected"}
-```
+# Phase 4 - Todo AI Chatbot - Kubernetes Deployment
 
 ## Architecture
 
-**3-Tier Application Stack:**
-- **Frontend**: React TypeScript + Nginx (2 replicas)
-- **Backend**: Python FastAPI (2 replicas)
-- **Database**: PostgreSQL 16 (1 replica with persistent storage)
-
-## Components
-
-### Frontend
-- **Image**: todo-frontend:1.0.0
-- **Service**: NodePort on port 30080
-- **Access**: Via `minikube service` command
-
-### Backend
-- **Image**: todo-backend:1.0.0
-- **Service**: ClusterIP on port 8000
-- **Health**: `/health` endpoint
-- **API Docs**: `/docs` endpoint
-
-### Database
-- **Image**: postgres:16-alpine
-- **Service**: ClusterIP on port 5432
-- **Storage**: 5Gi persistent volume
-- **Database**: todo_chatbot
-
-## Configuration
-
-### Update Backend Environment (if needed)
-```bash
-# Edit backend values
-helm upgrade todo-backend charts/backend \
-  --set backend.openaiApiKey="your-api-key-here"
+```
+┌──────────────────────────────────────────────────────┐
+│                  Minikube Cluster                     │
+│                                                      │
+│  ┌────────────┐   ┌────────────┐   ┌─────────────┐  │
+│  │  Frontend   │──▶│  Backend   │──▶│  Database    │  │
+│  │  (Nginx)    │   │ (FastAPI)  │   │ (PostgreSQL) │  │
+│  │  Port: 80   │   │ Port: 8000 │   │ Port: 5432   │  │
+│  │  2 replicas │   │ 1 replica  │   │ 1 replica    │  │
+│  └────────────┘   └────────────┘   └─────────────┘  │
+│        │                                             │
+│   NodePort:30080                                     │
+└──────────────────────────────────────────────────────┘
+        │
+        ▼ (port-forward)
+  localhost:3000 ──▶ Browser
 ```
 
-### Update Frontend Backend URL (if needed)
-```bash
-# Edit frontend values
-helm upgrade todo-frontend charts/frontend \
-  --set config.backendUrl="http://todo-backend-service:8000"
+| Service | Internal Port | NodePort | Type |
+|---------|--------------|----------|------|
+| todo-frontend-service | 80 | 30080 | NodePort |
+| todo-backend-service | 8000 | 30800 | NodePort |
+| todo-database-service | 5432 | - | ClusterIP |
+
+---
+
+## Prerequisites
+
+- Docker Desktop (running)
+- Minikube installed
+- kubectl installed
+- Helm 3+ installed
+
+---
+
+## Fresh Deployment (Step by Step)
+
+### Step 1: Start Minikube
+
+```powershell
+minikube start --cpus=2 --memory=3072 --driver=docker
 ```
+
+### Step 2: Enable Addons
+
+```powershell
+minikube addons enable ingress
+```
+
+```powershell
+minikube addons enable metrics-server
+```
+
+### Step 3: Build Docker Images
+
+```powershell
+cd E:\hackathon-ii\Phase_4
+```
+
+```powershell
+docker build -t todo-frontend:2.0.3 ./frontend
+```
+
+```powershell
+docker build -t todo-backend:1.0.0 ./backend
+```
+
+### Step 4: Load Images into Minikube
+
+```powershell
+minikube image load todo-frontend:2.0.3
+```
+
+```powershell
+minikube image load todo-backend:1.0.0
+```
+
+### Step 5: Deploy Database
+
+```powershell
+helm install todo-database charts/database
+```
+
+```powershell
+kubectl wait --for=condition=ready pod/todo-database-0 --timeout=180s
+```
+
+
+### Step 6: Deploy Backend
+
+```powershell
+helm install todo-backend charts/backend --set backend.openaiApiKey="YOUR-OPENAI-API-KEY"
+```
+
+```powershell
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=backend --timeout=180s
+```
+
+### Step 7: Deploy Frontend
+
+```powershell
+helm install todo-frontend charts/frontend
+```
+
+```powershell
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=frontend --timeout=180s
+```
+
+### Step 8: Verify Deployment
+
+```powershell
+kubectl get pods
+```
+
+Expected:
+```
+NAME                                        READY   STATUS
+todo-backend-xxxxxxxxx-xxxxx                1/1     Running
+todo-database-0                             1/1     Running
+todo-frontend-deployment-xxxxxxxxx-xxxxx    1/1     Running
+todo-frontend-deployment-xxxxxxxxx-xxxxx    1/1     Running
+```
+
+### Step 9: Access App (2 separate PowerShell windows)
+
+**Window 1 - Frontend:**
+```powershell
+kubectl port-forward svc/todo-frontend-service 3000:80
+```
+
+**Window 2 - Backend:**
+```powershell
+kubectl port-forward svc/todo-backend-service 5000:8000
+```
+
+### Step 10: Open Browser
+
+```
+http://localhost:3000
+```
+
+Signup karo, login karo, chat karo!
+
+---
+
+## PC Restart ke Baad
+
+```powershell
+minikube start
+```
+
+```powershell
+kubectl get pods
+```
+
+Agar pods Running dikhayein:
+```powershell
+kubectl port-forward svc/todo-frontend-service 3000:80
+```
+```powershell
+kubectl port-forward svc/todo-backend-service 5000:8000
+```
+
+Agar pods NOT Running:
+```powershell
+helm install todo-database charts/database
+```
+```powershell
+kubectl wait --for=condition=ready pod/todo-database-0 --timeout=180s
+```
+```powershell
+helm install todo-backend charts/backend
+```
+```powershell
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=backend --timeout=180s
+```
+```powershell
+helm install todo-frontend charts/frontend
+```
+```powershell
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=frontend --timeout=180s
+```
+
+---
+
+## Cleanup (Sab Band Karna Ho)
+
+```powershell
+helm uninstall todo-frontend
+```
+
+```powershell
+helm uninstall todo-backend
+```
+
+```powershell
+helm uninstall todo-database
+```
+
+```powershell
+kubectl delete pvc --all
+```
+
+```powershell
+minikube stop
+```
+
+Pura cluster delete karna ho:
+```powershell
+minikube delete
+```
+
+---
+
+## Quick Reference
+
+| Task | Command |
+|------|---------|
+| Check pods | `kubectl get pods` |
+| Check services | `kubectl get services` |
+| Backend logs | `kubectl logs -l app.kubernetes.io/name=backend --tail=50` |
+| Frontend logs | `kubectl logs -l app.kubernetes.io/name=frontend --tail=50` |
+| Database logs | `kubectl logs todo-database-0 --tail=50` |
+| Restart backend | `kubectl rollout restart deployment todo-backend` |
+| Restart frontend | `kubectl rollout restart deployment todo-frontend-deployment` |
+| Describe pod | `kubectl describe pod <pod-name>` |
+| Exec into pod | `kubectl exec -it <pod-name> -- /bin/sh` |
+| Minikube status | `minikube status` |
+| Minikube IP | `minikube ip` |
+| Helm releases | `helm list` |
+| Smoke tests | `bash scripts/validate-deployment.sh` |
+
+---
 
 ## Troubleshooting
 
-### Pods not starting
-```bash
-# Check pod status
-kubectl get pods
-
-# Check pod logs
-kubectl logs <pod-name>
-
-# Describe pod for events
+### Pods stuck in Pending
+```powershell
 kubectl describe pod <pod-name>
 ```
 
-### Storage provisioner issues
-```bash
-# Restart storage provisioner
-minikube addons disable storage-provisioner
-minikube addons enable storage-provisioner
+### ErrImageNeverPull
+Image Minikube mein load nahi hui:
+```powershell
+minikube image load todo-frontend:2.0.3
+minikube image load todo-backend:1.0.0
+kubectl rollout restart deployment <deployment-name>
 ```
 
-### Backend database connection issues
-```bash
-# Check database pod
-kubectl get pods -l app.kubernetes.io/name=database
-
-# Check backend logs
+### Backend CrashLoopBackOff
+```powershell
 kubectl logs -l app.kubernetes.io/name=backend --tail=50
 ```
 
-## Cleanup
-
-Remove all deployments:
-```bash
-helm uninstall todo-frontend
-helm uninstall todo-backend
-helm uninstall todo-database
-kubectl delete pvc data-todo-database-0
+### Cannot connect to localhost:3000
+Port-forward band ho gaya hai. Dobara chalaao:
+```powershell
+kubectl port-forward svc/todo-frontend-service 3000:80
 ```
 
-## Documentation
+### Chat gives "Request failed with status 500"
+OpenAI API key check karo:
+```powershell
+helm upgrade todo-backend charts/backend --set backend.openaiApiKey="YOUR-REAL-KEY"
+kubectl rollout restart deployment todo-backend
+```
 
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for complete deployment documentation including:
-- Detailed architecture diagrams
-- Resource allocation
-- Troubleshooting guide
-- Security considerations
-- Next steps for production
+### Release name already in use
+```powershell
+helm uninstall <release-name>
+```
+
+### Cluster unreachable / EOF error
+```powershell
+minikube stop
+minikube start --cpus=2 --memory=3072 --driver=docker
+```
+
+---
+
+## Operational Scripts
+
+| Script | Purpose | Command |
+|--------|---------|---------|
+| Prerequisites check | Verify tools installed | `bash scripts/check-prerequisites.sh` |
+| Smoke tests | 7 automated tests | `bash scripts/validate-deployment.sh` |
+| Cleanup | Teardown all resources | `bash scripts/cleanup-deployment.sh` |
+| Upgrade | Rolling upgrade | `bash scripts/upgrade-deployment.sh --component frontend --frontend-tag 2.1.0` |
+| Rollback | Helm rollback | `bash scripts/rollback-deployment.sh --component backend` |
+
+---
 
 ## Project Structure
 
 ```
 Phase_4/
-├── backend/              # Python FastAPI application
-│   ├── src/             # Source code
-│   ├── Dockerfile       # Backend container image
-│   └── requirements.txt # Python dependencies
-├── frontend/            # React TypeScript application
-│   ├── src/            # Source code
-│   ├── Dockerfile      # Multi-stage frontend build
-│   └── nginx.conf      # Nginx configuration
-├── charts/             # Helm charts
-│   ├── frontend/       # Frontend Helm chart
-│   ├── backend/        # Backend Helm chart
-│   └── database/       # PostgreSQL Helm chart
-├── DEPLOYMENT.md       # Complete deployment documentation
-└── README.md          # This file
+├── frontend/               # React TypeScript + Nginx
+│   ├── src/               # Source code
+│   ├── Dockerfile         # Multi-stage build
+│   └── nginx.conf         # Nginx + API proxy config
+├── backend/                # Python FastAPI
+│   ├── src/               # Source code
+│   ├── Dockerfile         # Python 3.11-slim build
+│   └── requirements.txt   # Dependencies
+├── charts/                 # Helm Charts
+│   ├── frontend/          # Frontend chart (2 replicas)
+│   ├── backend/           # Backend chart (1 replica)
+│   └── database/          # PostgreSQL StatefulSet
+├── scripts/                # Automation
+│   ├── check-prerequisites.sh
+│   ├── validate-deployment.sh
+│   ├── cleanup-deployment.sh
+│   ├── upgrade-deployment.sh
+│   └── rollback-deployment.sh
+└── specs/                  # Specifications & Planning
+    └── 1-k8s-deployment/
+        ├── spec.md
+        ├── plan.md
+        └── tasks.md
 ```
-
-## Status
-
-✅ **Deployment Complete**
-- All components deployed successfully
-- Health checks passing
-- Full stack integration verified
-- Documentation complete
-
-## Support
-
-For issues or questions:
-1. Check [DEPLOYMENT.md](./DEPLOYMENT.md) troubleshooting section
-2. Review pod logs: `kubectl logs <pod-name>`
-3. Check service status: `kubectl get svc`
-4. Verify resource allocation: `kubectl top pods`
 
 ---
 
-**Last Updated**: 2026-01-07
-**Status**: Production Ready (with security updates needed for production use)
+**Project**: Todo AI Chatbot
+**Phase**: 4 - Kubernetes Deployment
+**Last Updated**: 2026-02-07

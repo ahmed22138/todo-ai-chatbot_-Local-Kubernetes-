@@ -3,7 +3,7 @@ replicaCount: 2
 
 image:
   repository: todo-frontend
-  tag: "2.0.2"
+  tag: "2.0.3"
   pullPolicy: Never  # Use local image from Minikube
 
 nameOverride: ""
