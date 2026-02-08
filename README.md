@@ -34,6 +34,7 @@
 - Minikube installed
 - kubectl installed
 - Helm 3+ installed
+- OpenAI API Key (for AI chat feature)
 
 ---
 
@@ -79,44 +80,61 @@ minikube image load todo-frontend:2.0.3
 minikube image load todo-backend:1.0.0
 ```
 
-### Step 5: Deploy Database
+### Step 5: Setup OpenAI API Key
+
+Create the file `charts/backend/values-local.yaml` with your OpenAI API key:
+
+```powershell
+@"
+backend:
+  openaiApiKey: "YOUR-OPENAI-API-KEY-HERE"
+"@ | Out-File -FilePath charts/backend/values-local.yaml -Encoding utf8
+```
+
+Replace `YOUR-OPENAI-API-KEY-HERE` with your actual OpenAI API key.
+
+### Step 6: Deploy Database
 
 ```powershell
 helm install todo-database charts/database
 ```
 
 ```powershell
-kubectl wait --for=condition=ready pod/todo-database-0 --timeout=180s
+kubectl wait --for=condition=ready pod/todo-database-0 --timeout=300s
 ```
 
+> If timeout hota hai, run: `kubectl delete pod -n kube-system -l k8s-app=kube-dns` and then retry wait command.
 
-### Step 6: Deploy Backend
+### Step 7: Deploy Backend
 
 ```powershell
 helm install todo-backend charts/backend -f charts/backend/values-local.yaml
 ```
 
+
 ```powershell
-kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=backend --timeout=180s
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=backend --timeout=300s
 ```
 
-### Step 7: Deploy Frontend
+### Step 8: Deploy Frontend
 
 ```powershell
 helm install todo-frontend charts/frontend
 ```
 
 ```powershell
-kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=frontend --timeout=180s
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=frontend --timeout=300s
 ```
 
-### Step 8: Verify Deployment
+> If timeout hota hai, run: `kubectl rollout restart deployment todo-frontend-deployment` and then retry wait command.
+
+### Step 9: Verify Deployment
 
 ```powershell
 kubectl get pods
 ```
 
-Expected:
+Expected output (all 1/1 Running):
 ```
 NAME                                        READY   STATUS
 todo-backend-xxxxxxxxx-xxxxx                1/1     Running
@@ -125,19 +143,23 @@ todo-frontend-deployment-xxxxxxxxx-xxxxx    1/1     Running
 todo-frontend-deployment-xxxxxxxxx-xxxxx    1/1     Running
 ```
 
-### Step 9: Access App (2 separate PowerShell windows)
+### Step 10: Access App
 
-**Window 1 - Frontend:**
+Open **2 separate PowerShell windows** and run one command in each:
+
+**PowerShell Window 1 (Frontend):**
 ```powershell
 kubectl port-forward svc/todo-frontend-service 3000:80
 ```
 
-**Window 2 - Backend:**
+**PowerShell Window 2 (Backend):**
 ```powershell
 kubectl port-forward svc/todo-backend-service 5000:8000
 ```
 
-### Step 10: Open Browser
+> Note: These commands keep running. Do NOT close these windows.
+
+### Step 11: Open Browser
 
 ```
 http://localhost:3000
@@ -149,6 +171,8 @@ Signup karo, login karo, chat karo!
 
 ## PC Restart ke Baad
 
+### Option A: Pods Already Running
+
 ```powershell
 minikube start
 ```
@@ -157,32 +181,74 @@ minikube start
 kubectl get pods
 ```
 
-Agar pods Running dikhayein:
+Agar sab pods `1/1 Running` dikhayein, sirf port-forward karo (2 alag windows me):
+
 ```powershell
 kubectl port-forward svc/todo-frontend-service 3000:80
 ```
+
 ```powershell
 kubectl port-forward svc/todo-backend-service 5000:8000
 ```
 
-Agar pods NOT Running:
+### Option B: Pods NOT Running
+
+```powershell
+minikube start
+```
+
 ```powershell
 helm install todo-database charts/database
 ```
+
 ```powershell
-kubectl wait --for=condition=ready pod/todo-database-0 --timeout=180s
+kubectl wait --for=condition=ready pod/todo-database-0 --timeout=300s
 ```
+
 ```powershell
-helm install todo-backend charts/backend
+helm install todo-backend charts/backend -f charts/backend/values-local.yaml
 ```
+
 ```powershell
-kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=backend --timeout=180s
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=backend --timeout=300s
 ```
+
 ```powershell
 helm install todo-frontend charts/frontend
 ```
+
 ```powershell
-kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=frontend --timeout=180s
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=frontend --timeout=300s
+```
+
+Then port-forward (2 alag windows me):
+
+```powershell
+kubectl port-forward svc/todo-frontend-service 3000:80
+```
+
+```powershell
+kubectl port-forward svc/todo-backend-service 5000:8000
+```
+
+### Option C: Release Name Already in Use Error
+
+Pehle cleanup karo, phir Option B follow karo:
+
+```powershell
+helm uninstall todo-frontend
+```
+
+```powershell
+helm uninstall todo-backend
+```
+
+```powershell
+helm uninstall todo-database
+```
+
+```powershell
+kubectl delete pvc --all
 ```
 
 ---
@@ -238,17 +304,47 @@ minikube delete
 
 ## Troubleshooting
 
-### Pods stuck in Pending
+### Pods stuck in Pending (Database)
+Storage provisioner issue. Fix:
 ```powershell
-kubectl describe pod <pod-name>
+kubectl delete pod -n kube-system -l k8s-app=kube-dns
+```
+```powershell
+minikube addons disable storage-provisioner
+```
+```powershell
+minikube addons enable storage-provisioner
+```
+Then delete and reinstall database:
+```powershell
+helm uninstall todo-database
+```
+```powershell
+kubectl delete pvc --all
+```
+```powershell
+helm install todo-database charts/database
 ```
 
 ### ErrImageNeverPull
 Image Minikube mein load nahi hui:
 ```powershell
 minikube image load todo-frontend:2.0.3
+```
+```powershell
 minikube image load todo-backend:1.0.0
-kubectl rollout restart deployment <deployment-name>
+```
+```powershell
+kubectl rollout restart deployment todo-frontend-deployment
+```
+
+### Frontend pods 0/1 (not ready)
+Readiness probe slow hai. Fix:
+```powershell
+kubectl rollout restart deployment todo-frontend-deployment
+```
+```powershell
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=frontend --timeout=300s
 ```
 
 ### Backend CrashLoopBackOff
@@ -266,6 +362,8 @@ kubectl port-forward svc/todo-frontend-service 3000:80
 OpenAI API key check karo:
 ```powershell
 helm upgrade todo-backend charts/backend --set backend.openaiApiKey="YOUR-REAL-KEY"
+```
+```powershell
 kubectl rollout restart deployment todo-backend
 ```
 
@@ -277,6 +375,8 @@ helm uninstall <release-name>
 ### Cluster unreachable / EOF error
 ```powershell
 minikube stop
+```
+```powershell
 minikube start --cpus=2 --memory=3072 --driver=docker
 ```
 
