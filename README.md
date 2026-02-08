@@ -282,6 +282,27 @@ minikube start --cpus=2 --memory=3072 --driver=docker
 
 ---
 
+## AI Tools Used
+
+| Tool | Purpose | How Used |
+|------|---------|----------|
+| **Docker AI (Gordon)** | AI-assisted Docker operations | Analyzed & optimized frontend/backend Dockerfiles for security & performance |
+| **kubectl-ai** | AI-assisted Kubernetes operations | Natural language pod management, health checks, resource monitoring |
+
+See [AI-TOOLS-USAGE.md](AI-TOOLS-USAGE.md) for detailed usage evidence.
+
+### Quick Commands
+```powershell
+# Gordon - Docker AI (no setup needed)
+docker ai "analyze my Dockerfile for security issues" -C E:\hackathon-ii\Phase_4
+
+# kubectl-ai (needs API key)
+$env:OPENAI_API_KEY = "your-key"
+E:\hackathon-ii\Phase_4\kubectl-ai-temp\kubectl-ai.exe "list all pods"
+```
+
+---
+
 ## Operational Scripts
 
 | Script | Purpose | Command |
