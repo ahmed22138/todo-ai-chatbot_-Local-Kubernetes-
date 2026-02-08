@@ -80,20 +80,7 @@ minikube image load todo-frontend:2.0.3
 minikube image load todo-backend:1.0.0
 ```
 
-### Step 5: Setup OpenAI API Key
-
-Create the file `charts/backend/values-local.yaml` with your OpenAI API key:
-
-```powershell
-@"
-backend:
-  openaiApiKey: "YOUR-OPENAI-API-KEY-HERE"
-"@ | Out-File -FilePath charts/backend/values-local.yaml -Encoding utf8
-```
-
-Replace `YOUR-OPENAI-API-KEY-HERE` with your actual OpenAI API key.
-
-### Step 6: Deploy Database
+### Step 5: Deploy Database
 
 ```powershell
 helm install todo-database charts/database
@@ -105,10 +92,10 @@ kubectl wait --for=condition=ready pod/todo-database-0 --timeout=300s
 
 > If timeout hota hai, run: `kubectl delete pod -n kube-system -l k8s-app=kube-dns` and then retry wait command.
 
-### Step 7: Deploy Backend
+### Step 6: Deploy Backend
 
 ```powershell
-helm install todo-backend charts/backend -f charts/backend/values-local.yaml
+helm install todo-backend charts/backend
 ```
 
 
@@ -116,7 +103,7 @@ helm install todo-backend charts/backend -f charts/backend/values-local.yaml
 kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=backend --timeout=300s
 ```
 
-### Step 8: Deploy Frontend
+### Step 7: Deploy Frontend
 
 ```powershell
 helm install todo-frontend charts/frontend
@@ -128,7 +115,7 @@ kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=frontend --time
 
 > If timeout hota hai, run: `kubectl rollout restart deployment todo-frontend-deployment` and then retry wait command.
 
-### Step 9: Verify Deployment
+### Step 8: Verify Deployment
 
 ```powershell
 kubectl get pods
@@ -143,7 +130,7 @@ todo-frontend-deployment-xxxxxxxxx-xxxxx    1/1     Running
 todo-frontend-deployment-xxxxxxxxx-xxxxx    1/1     Running
 ```
 
-### Step 10: Access App
+### Step 9: Access App
 
 Open **2 separate PowerShell windows** and run one command in each:
 
@@ -159,7 +146,7 @@ kubectl port-forward svc/todo-backend-service 5000:8000
 
 > Note: These commands keep running. Do NOT close these windows.
 
-### Step 11: Open Browser
+### Step 10: Open Browser
 
 ```
 http://localhost:3000
@@ -206,7 +193,7 @@ kubectl wait --for=condition=ready pod/todo-database-0 --timeout=300s
 ```
 
 ```powershell
-helm install todo-backend charts/backend -f charts/backend/values-local.yaml
+helm install todo-backend charts/backend
 ```
 
 ```powershell
@@ -359,10 +346,7 @@ kubectl port-forward svc/todo-frontend-service 3000:80
 ```
 
 ### Chat gives "Request failed with status 500"
-OpenAI API key check karo:
-```powershell
-helm upgrade todo-backend charts/backend --set backend.openaiApiKey="YOUR-REAL-KEY"
-```
+Backend restart karo:
 ```powershell
 kubectl rollout restart deployment todo-backend
 ```
