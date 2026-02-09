@@ -27,7 +27,7 @@ backend:
   jwtSecret: "your-super-secret-jwt-key-min-32-chars-required-for-security"
 
   # OpenAI API key
-  openaiApiKey: "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"
+  openaiApiKey: "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"
 
 # Replicas
 replicaCount: 1
